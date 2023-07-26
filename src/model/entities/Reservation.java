@@ -1,5 +1,7 @@
 package model.entities;
 
+import model.exceptions.DomainException;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +14,9 @@ public class Reservation {
     //Static para não ser instanciado um novo sdf para cada objeto reservation que o app tiver
 
     public Reservation(Integer roomNumber, Date checkIn, Date checkOut) {
+        if (!checkOut.after(checkIn)){//Testar se chekout não é antes do checkin
+            throw new DomainException("Check-out date must be after check-in date");
+        }
         this.roomNumber = roomNumber;
         this.checkIn = checkIn;
         this.checkOut = checkOut;
@@ -36,18 +41,17 @@ public class Reservation {
         long diff = checkOut.getTime() - checkIn.getTime();//Diferença das duas datas em mS
         return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);//Converte de mS para dias
     }
-    public String updateDates(Date checkIn, Date checkOut){
+    public void updateDates(Date checkIn, Date checkOut) {
         Date now = new Date();
         if (checkIn.before(now) || checkOut.before(now)){//Testar se checkin e checkout são antes de agora
-           return "Reservation dates for update must be future dates";
+           throw new DomainException("Reservation dates for update must be future dates");
+           //Lançar uma exceção
         }
         if (!checkOut.after(checkIn)){//Testar se chekout não é antes do checkin
-           return "Check-out date must be after check-in date";
+           throw new DomainException("Check-out date must be after check-in date");
         }
-
         this.checkIn = checkIn;
         this.checkOut = checkOut;
-        return null; //Se retornar nulo não deu nenhum erro / Se retornar alguma String deu erro
     }
 
     @Override
